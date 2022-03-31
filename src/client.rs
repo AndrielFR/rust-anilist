@@ -52,7 +52,12 @@ impl Client {
         crate::models::Model::new(media_type, &data["data"]["Media"])
     }
 
-    pub async fn mutate(&self, _media_type: &str, _id: i32, _variables: serde_json::Value) -> Result<bool> {
+    pub async fn mutate(
+        &self,
+        _media_type: &str,
+        _id: i32,
+        _variables: serde_json::Value,
+    ) -> Result<bool> {
         todo!()
     }
 
@@ -89,13 +94,13 @@ impl Client {
 
         let media_type = media_type.to_lowercase();
         match media_type.as_str() {
-            "anime" => {},
-            "manga" => {},
-            "character" => {},
-            "user" => {},
-            "person" => {},
-            "studio" => {},
-            _ => panic!("The media_type '{}' does not exits!", {media_type}),
+            "anime" => {}
+            "manga" => {}
+            "character" => {}
+            "user" => {}
+            "person" => {}
+            "studio" => {}
+            _ => panic!("The media_type '{}' does not exits!", { media_type }),
         }
 
         let file_name = format!("{}_{}.graphql", action, media_type);

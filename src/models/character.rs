@@ -1,5 +1,5 @@
-//·SPDX-License-Identifier:·MIT
-//·Copyright·(c)·2022·Andriel·Ferreira·<https://github.com/AndrielFR>
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2022 Andriel Ferreira <https://github.com/AndrielFR>
 
 use crate::models::Gender;
 use crate::models::Image;
@@ -69,7 +69,8 @@ impl Character {
                 let mut alternative_spoiler = Vec::with_capacity(alternative_spoiler_array.len());
 
                 for alternative_spoiler_name in alternative_spoiler_array {
-                    alternative_spoiler.push(alternative_spoiler_name.as_str().unwrap().to_string());
+                    alternative_spoiler
+                        .push(alternative_spoiler_name.as_str().unwrap().to_string());
                 }
 
                 name.alternative_spoiler = alternative_spoiler;

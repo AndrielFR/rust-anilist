@@ -1,5 +1,5 @@
-//·SPDX-License-Identifier:·MIT
-//·Copyright·(c)·2022·Andriel·Ferreira·<https://github.com/AndrielFR>
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2022 Andriel Ferreira <https://github.com/AndrielFR>
 
 #[derive(Debug, Default, Clone)]
 pub struct Notification {}

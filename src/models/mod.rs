@@ -1,5 +1,5 @@
-//·SPDX-License-Identifier:·MIT↴
-// Copyright·(c)·2022·Andriel·Ferreira·<https://github.com/AndrielFR>↴
+// SPDX-License-Identifier: MIT↴
+// Copyright (c) 2022 Andriel Ferreira <https://github.com/AndrielFR>↴
 
 mod anime;
 mod character;
@@ -10,6 +10,8 @@ mod format;
 mod gender;
 mod image;
 mod language;
+mod link;
+mod manga;
 mod name;
 mod notification;
 mod person;
@@ -18,12 +20,10 @@ mod score;
 mod season;
 mod source;
 mod status;
+mod studio;
 mod tag;
 mod title;
 mod user;
-mod manga;
-mod studio;
-mod link;
 
 pub use anime::Anime;
 pub use character::{Character, Role as CharacterRole};
@@ -34,6 +34,8 @@ pub use format::Format;
 pub use gender::Gender;
 pub use image::Image;
 pub use language::Language;
+pub use link::{Link, Type as LinkType};
+pub use manga::Manga;
 pub use name::Name;
 pub use notification::{Notification, NotificationOption, Type as NotificationType};
 pub use person::Person;
@@ -42,12 +44,10 @@ pub use score::{Format as ScoreFormat, Score};
 pub use season::Season;
 pub use source::Source;
 pub use status::Status;
+pub use studio::Studio;
 pub use tag::Tag;
 pub use title::Title;
 pub use user::User;
-pub use manga::Manga;
-pub use studio::Studio;
-pub use link::{Link, Type as LinkType};
 
 #[derive(Debug, Clone)]
 pub enum Model {

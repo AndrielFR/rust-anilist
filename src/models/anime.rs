@@ -1,23 +1,23 @@
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2022 Andriel·Ferreira·<https://github.com/AndrielFR>
+// Copyright (c) 2022 Andriel Ferreira <https://github.com/AndrielFR>
 
 use crate::models::Character;
+use crate::models::Color;
 use crate::models::Cover;
 use crate::models::Date;
 use crate::models::Format;
+use crate::models::Language;
+use crate::models::Name;
 use crate::models::Person;
-use crate::models::{Relation, RelationType};
 use crate::models::Score;
 use crate::models::Season;
 use crate::models::Source;
 use crate::models::Status;
+use crate::models::Studio;
 use crate::models::Tag;
 use crate::models::Title;
-use crate::models::Color;
-use crate::models::Name;
-use crate::models::Studio;
 use crate::models::{Link, LinkType};
-use crate::models::Language;
+use crate::models::{Relation, RelationType};
 
 #[derive(Debug, Default, Clone)]
 pub struct Anime {
@@ -400,7 +400,7 @@ impl Anime {
                                 "KOREAN" => Some(Language::Korean),
                                 _ => Some(Language::default()),
                             }
-                        },
+                        }
                         None => None,
                     },
                     color: match external_link["color"].as_str() {
@@ -419,7 +419,8 @@ impl Anime {
         }
 
         if let Some(streaming_episodes_array) = data["streamingEpisodes"].as_array() {
-            let mut streaming_episodes: Vec<Link> = Vec::with_capacity(streaming_episodes_array.len());
+            let mut streaming_episodes: Vec<Link> =
+                Vec::with_capacity(streaming_episodes_array.len());
 
             for streaming_episode in streaming_episodes_array {
                 streaming_episodes.push(Link {

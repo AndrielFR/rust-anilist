@@ -1,19 +1,19 @@
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2022 Andriel·Ferreira·<https://github.com/AndrielFR>
+// Copyright (c) 2022 Andriel Ferreira <https://github.com/AndrielFR>
 
 use crate::models::Character;
+use crate::models::Color;
 use crate::models::Cover;
 use crate::models::Date;
 use crate::models::Format;
 use crate::models::Person;
-use crate::models::{Relation, RelationType};
 use crate::models::Score;
 use crate::models::Season;
 use crate::models::Source;
 use crate::models::Status;
 use crate::models::Tag;
 use crate::models::Title;
-use crate::models::Color;
+use crate::models::{Relation, RelationType};
 
 #[derive(Debug, Default, Clone)]
 pub struct Manga {
@@ -269,7 +269,11 @@ impl Manga {
                     let node = edge.get("node").unwrap();
                     println!("{}", &node["type"].as_str().unwrap().to_lowercase());
                     relations.push(Relation {
-                        media: crate::models::Model::new(&node["type"].as_str().unwrap().to_lowercase(), node).unwrap(),
+                        media: crate::models::Model::new(
+                            &node["type"].as_str().unwrap().to_lowercase(),
+                            node,
+                        )
+                        .unwrap(),
                         id: 1i64,
                         relation_type: RelationType::Source,
                         is_main_studio: false,

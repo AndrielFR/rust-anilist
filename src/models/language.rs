@@ -1,6 +1,6 @@
-//·SPDX-License-Identifier:·MIT
+// SPDX-License-Identifier: MIT
 //
-//·Copyright·(c)·2022·Andriel·Ferreira·<https://github.com/AndrielFR>
+// Copyright (c) 2022 Andriel Ferreira <https://github.com/AndrielFR>
 
 #[derive(Debug, Clone)]
 pub enum Language {
