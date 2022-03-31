@@ -1,0 +1,18 @@
+[package]
+name = "rust-anilist"
+version = "0.1.0"
+authors = ["Andriel Ferreira <andrielkogama2@gmail.com>"]
+license = "MTI"
+description = """
+Just a Anilist wrapper.
+"""
+homepage = "https://github.com/AndrielFR/rust-anilist"
+repository = "https://github.com/AndrielFR/rust-anilist"
+keywords = ["api", "anilist", "anilist-api"]
+categories = ["api-binding"]
+edition = "2021"
+
+[dependencies]
+reqwest = "^0.11"
+serde_json = "^1.0"
+tokio = { version = "^1.17", features = ["macros", "rt-multi-thread"] }
