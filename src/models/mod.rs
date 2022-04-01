@@ -49,26 +49,15 @@ pub use tag::Tag;
 pub use title::Title;
 pub use user::User;
 
-#[derive(Debug, Clone)]
-pub enum Model {
-    Anime(Anime),
-    Manga(Manga),
-    Character(Character),
-    User(User),
-    Person(Person),
-    Studio(Studio),
+#[derive(Debug, Copy, Clone, PartialEq)]
+pub enum MediaType {
+    Anime,
+    Manga,
+    Unknown,
 }
 
-impl Model {
-    pub(crate) fn new(media_type: &str, data: &serde_json::Value) -> Option<Self> {
-        match media_type {
-            "anime" => Some(Self::Anime(Anime::parse(data, None))),
-            "manga" => Some(Self::Manga(Manga::parse(data, None))),
-            "character" => Some(Self::Character(Character::parse(data, None))),
-            "user" => Some(Self::User(User::parse(data, None))),
-            "person" => Some(Self::Person(Person::parse(data, None))),
-            "studio" => Some(Self::Studio(Studio::parse(data, None))),
-            _ => None,
-        }
+impl Default for MediaType {
+    fn default() -> Self {
+        MediaType::Unknown
     }
 }

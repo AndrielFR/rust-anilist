@@ -1,21 +1,25 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2022 Andriel Ferreira <https://github.com/AndrielFR>
 
+use crate::models::Anime;
 use crate::models::Character;
 use crate::models::Color;
 use crate::models::Cover;
 use crate::models::Date;
 use crate::models::Format;
+use crate::models::Language;
+use crate::models::MediaType;
 use crate::models::Person;
 use crate::models::Score;
-use crate::models::Season;
 use crate::models::Source;
 use crate::models::Status;
+use crate::models::Studio;
 use crate::models::Tag;
 use crate::models::Title;
+use crate::models::{Link, LinkType};
 use crate::models::{Relation, RelationType};
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Default, Clone, PartialEq)]
 pub struct Manga {
     pub id: i64,
     pub id_mal: Option<i64>,
@@ -25,16 +29,15 @@ pub struct Manga {
     pub description: String,
     pub start_date: Option<Date>,
     pub end_date: Option<Date>,
-    pub season: Option<Season>,
-    pub season_year: Option<i64>,
-    pub season_int: Option<i64>,
+    pub chapters: Option<i64>,
+    pub volumes: Option<i64>,
     pub country_of_origin: Option<String>,
     pub is_licensed: Option<bool>,
     pub source: Option<Source>,
     pub hashtag: Option<String>,
     pub updated_at: Option<i64>,
     pub cover: Cover,
-    pub banner: String,
+    pub banner: Option<String>,
     pub genres: Option<Vec<String>>,
     pub synonyms: Option<Vec<String>>,
     pub score: Score,
@@ -46,14 +49,18 @@ pub struct Manga {
     pub relations: Option<Vec<Relation>>,
     pub characters: Option<Vec<Character>>,
     pub staff: Option<Vec<Person>>,
+    pub studios: Option<Vec<Studio>>,
+    pub is_favourite: Option<bool>,
+    pub is_favourite_blocked: Option<bool>,
+    pub is_adult: Option<bool>,
+    pub external_links: Option<Vec<Link>>,
+    pub url: String,
+    pub(crate) is_full_loaded: bool,
 }
 
 impl Manga {
-    pub(crate) fn parse(data: &serde_json::Value, manga: Option<Manga>) -> Self {
-        let mut manga = match manga {
-            Some(manga) => manga,
-            None => Manga::default(),
-        };
+    pub(crate) fn parse(data: &serde_json::Value) -> Self {
+        let mut manga = Manga::default();
 
         manga.id = data["id"].as_i64().unwrap();
 
@@ -64,7 +71,10 @@ impl Manga {
         let title = data["title"].as_object().unwrap();
         manga.title = Title {
             romaji: Some(title["romaji"].as_str().unwrap().to_string()),
-            english: Some(title["english"].as_str().unwrap().to_string()),
+            english: match title["english"].as_str() {
+                Some(title) => Some(title.to_string()),
+                None => None,
+            },
             native: title["native"].as_str().unwrap().to_string(),
             user_preferred: Some(title["userPreferred"].as_str().unwrap().to_string()),
         };
@@ -126,21 +136,12 @@ impl Manga {
             manga.end_date = Some(date);
         }
 
-        if let Some(season) = data["season"].as_str() {
-            manga.season = match season {
-                "WINTER" => Some(Season::Winter),
-                "SPRING" => Some(Season::Spring),
-                "SUMMER" => Some(Season::Summer),
-                _ => Some(Season::Fall),
-            };
+        if let Some(chapters) = data["chapters"].as_i64() {
+            manga.chapters = Some(chapters);
         }
 
-        if let Some(season_year) = data["seasonYear"].as_i64() {
-            manga.season_year = Some(season_year);
-        }
-
-        if let Some(season_int) = data["seasonInt"].as_i64() {
-            manga.season_int = Some(season_int);
+        if let Some(volumes) = data["volumes"].as_i64() {
+            manga.volumes = Some(volumes);
         }
 
         if let Some(country_of_origin) = data["countryOfOrigin"].as_str() {
@@ -193,7 +194,9 @@ impl Manga {
             manga.cover = cover;
         }
 
-        manga.banner = data["bannerImage"].as_str().unwrap().to_string();
+        if let Some(banner) = data["bannerImage"].as_str() {
+            manga.banner = Some(banner.to_string());
+        }
 
         if let Some(genres_array) = data["genres"].as_array() {
             let mut genres = Vec::with_capacity(genres_array.len());
@@ -216,11 +219,11 @@ impl Manga {
         }
 
         let mut score = Score::default();
-        if let Some(average) = data["averageScore"].as_f64() {
+        if let Some(average) = data["averageScore"].as_i64() {
             score.average = average;
         }
 
-        if let Some(mean) = data["meanScore"].as_f64() {
+        if let Some(mean) = data["meanScore"].as_i64() {
             score.mean = mean;
         }
         manga.score = score;
@@ -267,16 +270,38 @@ impl Manga {
 
                 for edge in edges {
                     let node = edge.get("node").unwrap();
-                    println!("{}", &node["type"].as_str().unwrap().to_lowercase());
+                    let media_type = match node["type"].as_str().unwrap() {
+                        "ANIME" => MediaType::Anime,
+                        "MANGA" => MediaType::Manga,
+                        _ => MediaType::default(),
+                    };
                     relations.push(Relation {
-                        media: crate::models::Model::new(
-                            &node["type"].as_str().unwrap().to_lowercase(),
-                            node,
-                        )
-                        .unwrap(),
-                        id: 1i64,
-                        relation_type: RelationType::Source,
-                        is_main_studio: false,
+                        media_type: media_type,
+                        anime: match media_type {
+                            MediaType::Anime => Some(Anime::parse(node)),
+                            _ => None,
+                        },
+                        manga: match media_type {
+                            MediaType::Manga => Some(Manga::parse(node)),
+                            _ => None,
+                        },
+                        id: edge["id"].as_i64().unwrap(),
+                        relation_type: match edge["relationType"].as_str().unwrap() {
+                            "ADAPTATION" => RelationType::Adaptation,
+                            "PREQUEL" => RelationType::Prequel,
+                            "SEQUEL" => RelationType::Sequel,
+                            "PARENT" => RelationType::Parent,
+                            "SIDE_STORY" => RelationType::SideStory,
+                            "CHARACTER" => RelationType::Character,
+                            "SUMMARY" => RelationType::Summary,
+                            "ALTERNATIVE" => RelationType::Alternative,
+                            "SPIN_OFF" => RelationType::SpinOff,
+                            "OTHER" => RelationType::Other,
+                            "COMPILATION" => RelationType::Compilation,
+                            "CONTAINS" => RelationType::Contains,
+                            _ => RelationType::Source,
+                        },
+                        is_main_studio: edge["isMainStudio"].as_bool().unwrap(),
                     });
                 }
 
@@ -284,6 +309,110 @@ impl Manga {
             }
         }
 
+        if let Some(characters) = data["characters"].as_object() {
+            if let Some(nodes) = characters["nodes"].as_array() {
+                let mut characters: Vec<Character> = Vec::with_capacity(nodes.len());
+
+                for node in nodes {
+                    characters.push(Character::parse(node));
+                }
+
+                manga.characters = Some(characters);
+            }
+        }
+
+        if let Some(persons) = data["staff"].as_object() {
+            if let Some(nodes) = persons["nodes"].as_array() {
+                let mut staff: Vec<Person> = Vec::with_capacity(nodes.len());
+
+                for node in nodes {
+                    staff.push(Person::parse(node, None));
+                }
+
+                manga.staff = Some(staff);
+            }
+        }
+
+        if let Some(studios) = data["studios"].as_object() {
+            if let Some(nodes) = studios["nodes"].as_array() {
+                let mut studios: Vec<Studio> = Vec::with_capacity(nodes.len());
+
+                for node in nodes {
+                    studios.push(Studio::parse(node, None));
+                }
+
+                manga.studios = Some(studios);
+            }
+        }
+
+        if let Some(is_favourite) = data["isFavourite"].as_bool() {
+            manga.is_favourite = Some(is_favourite);
+        }
+
+        if let Some(is_favourite_blocked) = data["isFavouriteBlocked"].as_bool() {
+            manga.is_favourite_blocked = Some(is_favourite_blocked);
+        }
+
+        if let Some(is_adult) = data["isAdult"].as_bool() {
+            manga.is_adult = Some(is_adult);
+        }
+
+        if let Some(external_links_array) = data["externalLinks"].as_array() {
+            let mut external_links: Vec<Link> = Vec::with_capacity(external_links_array.len());
+
+            for external_link in external_links_array {
+                external_links.push(Link {
+                    id: external_link["id"].as_i64(),
+                    url: external_link["url"].as_str().unwrap().to_string(),
+                    site: external_link["site"].as_str().unwrap().to_string(),
+                    site_id: external_link["siteId"].as_i64(),
+                    link_type: match external_link["type"].as_str().unwrap() {
+                        "STREAMING" => Some(LinkType::Streaming),
+                        "SOCIAL" => Some(LinkType::Social),
+                        _ => Some(LinkType::default()),
+                    },
+                    language: match external_link["language"].as_str() {
+                        Some(language) => {
+                            // TODO: Add rest
+                            match language {
+                                "ENGLISH" => Some(Language::English),
+                                "KOREAN" => Some(Language::Korean),
+                                _ => Some(Language::default()),
+                            }
+                        }
+                        None => None,
+                    },
+                    color: match external_link["color"].as_str() {
+                        Some(hex) => Some(Color::Hex(hex.to_string())),
+                        None => None,
+                    },
+                    icon: match external_link["icon"].as_str() {
+                        Some(url) => Some(url.to_string()),
+                        None => None,
+                    },
+                    ..Default::default()
+                })
+            }
+
+            manga.external_links = Some(external_links);
+        }
+
+        manga.url = data["siteUrl"].as_str().unwrap().to_string();
+
         manga
+    }
+
+    pub async fn load_full(self) -> crate::Result<Self> {
+        if !self.is_full_loaded {
+            let mut manga = crate::Client::new()
+                .get_manga(serde_json::json!({"id": self.id}))
+                .await
+                .unwrap();
+            manga.is_full_loaded = true;
+
+            Ok(manga)
+        } else {
+            panic!("This manga is already full loaded")
+        }
     }
 }

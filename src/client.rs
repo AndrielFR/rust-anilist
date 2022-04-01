@@ -3,22 +3,21 @@
 
 use std::fs::File;
 use std::io::Read;
+use std::time::Duration;
 
 use crate::Result;
 
 #[derive(Clone)]
 pub struct Client {
     api_token: Option<String>,
-    timeout: i32,
-    max_retries: i32,
+    timeout: u64,
 }
 
 impl Default for Client {
     fn default() -> Self {
         Client {
             api_token: None,
-            timeout: 7,
-            max_retries: 2,
+            timeout: 20,
         }
     }
 }
@@ -33,23 +32,40 @@ impl Client {
         self
     }
 
-    pub fn timeout(mut self, seconds: i32) -> Self {
+    pub fn timeout(mut self, seconds: u64) -> Self {
         self.timeout = seconds;
         self
     }
 
-    pub fn max_retries(mut self, count: i32) -> Self {
-        self.max_retries = count;
-        self
+    pub async fn get_anime(&self, variables: serde_json::Value) -> Result<crate::models::Anime> {
+        let data = self.request("anime", "get", variables).await.unwrap();
+        let mut anime = crate::models::Anime::parse(&data["data"]["Media"]);
+        anime.is_full_loaded = true;
+
+        Ok(anime)
     }
 
-    pub async fn get(
+    pub async fn get_manga(&self, variables: serde_json::Value) -> Result<crate::models::Manga> {
+        let data = self.request("manga", "get", variables).await.unwrap();
+        let mut manga = crate::models::Manga::parse(&data["data"]["Media"]);
+        manga.is_full_loaded = true;
+
+        Ok(manga)
+    }
+
+    pub async fn get_character(
         &self,
-        media_type: &str,
         variables: serde_json::Value,
-    ) -> Option<crate::models::Model> {
-        let data = self.request(media_type, "get", variables).await.unwrap();
-        crate::models::Model::new(media_type, &data["data"]["Media"])
+    ) -> Result<crate::models::Character> {
+        let data = self.request("character", "get", variables).await.unwrap();
+        let mut character = crate::models::Character::parse(&data["data"]["Character"]);
+        character.is_full_loaded = true;
+
+        Ok(character)
+    }
+
+    pub async fn get_char(&self, variables: serde_json::Value) -> Result<crate::models::Character> {
+        self.get_character(variables).await
     }
 
     pub async fn mutate(
@@ -61,17 +77,16 @@ impl Client {
         todo!()
     }
 
-    pub async fn search(
+    pub async fn search_anime(
         &self,
-        media_type: &str,
         variables: serde_json::Value,
-    ) -> Option<Vec<crate::models::Model>> {
-        let result = self.request(media_type, "search", variables).await.unwrap();
-        let mut _models = Vec::<crate::models::Model>::new();
+    ) -> Option<Vec<crate::models::Anime>> {
+        let result = self.request("anime", "search", variables).await.unwrap();
+        let mut _models = Vec::<crate::models::Anime>::new();
         todo!()
     }
 
-    async fn request(
+    pub(crate) async fn request(
         &self,
         media_type: &str,
         action: &str,
@@ -83,7 +98,14 @@ impl Client {
             .post("https://graphql.anilist.co/")
             .header("Content-Type", "application/json")
             .header("Accept", "application/json")
+            .timeout(Duration::from_secs(self.timeout))
             .body(json.to_string());
+
+        let body = match &self.api_token {
+            Some(token) => body.bearer_auth(token),
+            None => body,
+        };
+
         let response = body.send().await?.text().await?;
         let result: serde_json::Value = serde_json::from_str(&response).unwrap();
         Ok(result)

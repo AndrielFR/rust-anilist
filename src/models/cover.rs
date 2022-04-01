@@ -3,7 +3,7 @@
 
 use crate::models::Color;
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Default, Clone, PartialEq)]
 pub struct Cover {
     pub extra_large: Option<String>,
     pub large: Option<String>,

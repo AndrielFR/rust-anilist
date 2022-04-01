@@ -5,11 +5,12 @@ use crate::models::Character;
 use crate::models::Gender;
 use crate::models::Image;
 use crate::models::Language;
-use crate::models::Model;
 use crate::models::Name;
 use crate::models::User;
 
-#[derive(Debug, Default, Clone)]
+use crate::Result;
+
+#[derive(Debug, Default, Clone, PartialEq)]
 pub struct Person {
     id: i64,
     name: Name,
@@ -27,9 +28,7 @@ pub struct Person {
     is_favourite: Option<bool>,
     is_favourite_blocked: Option<bool>,
     url: String,
-    person_medias: Option<Vec<Model>>,
     characters: Option<Vec<Character>>,
-    character_medias: Option<Vec<Model>>,
     submitter: Option<User>,
     submitter_status: Option<i64>,
     submitter_notes: Option<String>,
@@ -83,5 +82,13 @@ impl Person {
         }
 
         person
+    }
+
+    pub async fn get_medias<T>() -> Result<T> {
+        todo!()
+    }
+
+    pub async fn get_character_medias<T>() -> Result<T> {
+        todo!()
     }
 }

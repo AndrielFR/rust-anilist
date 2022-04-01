@@ -7,7 +7,8 @@ use crate::models::Cover;
 use crate::models::Date;
 use crate::models::Format;
 use crate::models::Language;
-use crate::models::Name;
+use crate::models::Manga;
+use crate::models::MediaType;
 use crate::models::Person;
 use crate::models::Score;
 use crate::models::Season;
@@ -19,7 +20,7 @@ use crate::models::Title;
 use crate::models::{Link, LinkType};
 use crate::models::{Relation, RelationType};
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Default, Clone, PartialEq)]
 pub struct Anime {
     pub id: i64,
     pub id_mal: Option<i64>,
@@ -60,14 +61,12 @@ pub struct Anime {
     pub external_links: Option<Vec<Link>>,
     pub streaming_episodes: Option<Vec<Link>>,
     pub url: String,
+    pub(crate) is_full_loaded: bool,
 }
 
 impl Anime {
-    pub(crate) fn parse(data: &serde_json::Value, anime: Option<Anime>) -> Self {
-        let mut anime = match anime {
-            Some(anime) => anime,
-            None => Anime::default(),
-        };
+    pub(crate) fn parse(data: &serde_json::Value) -> Self {
+        let mut anime = Anime::default();
 
         anime.id = data["id"].as_i64().unwrap();
 
@@ -243,11 +242,11 @@ impl Anime {
         }
 
         let mut score = Score::default();
-        if let Some(average) = data["averageScore"].as_f64() {
+        if let Some(average) = data["averageScore"].as_i64() {
             score.average = average;
         }
 
-        if let Some(mean) = data["meanScore"].as_f64() {
+        if let Some(mean) = data["meanScore"].as_i64() {
             score.mean = mean;
         }
         anime.score = score;
@@ -288,45 +287,57 @@ impl Anime {
             anime.tags = Some(tags);
         }
 
-        // TODO: Uncomment this
-        // if let Some(relations) = data["relations"].as_object() {
-        //     if let Some(edges) = relations["edges"].as_array() {
-        //         let mut relations: Vec<Relation> = Vec::with_capacity(edges.len());
-        //
-        //         for edge in edges {
-        //             let node = edge.get("node").unwrap();
-        //             relations.push(Relation {
-        //                 media: crate::models::Model::new(&node["type"].as_str().unwrap().to_lowercase(), node).unwrap(),
-        //                 id: edge["id"].as_i64().unwrap(),
-        //                 relation_type: match edge["relationType"].as_str().unwrap() {
-        //                     "ADAPTATION" => RelationType::Adaptation,
-        //                     "PREQUEL" => RelationType::Prequel,
-        //                     "SEQUEL" => RelationType::Sequel,
-        //                     "PARENT" => RelationType::Parent,
-        //                     "SIDE_STORY" => RelationType::SideStory,
-        //                     "CHARACTER" => RelationType::Character,
-        //                     "SUMMARY" => RelationType::Summary,
-        //                     "ALTERNATIVE" => RelationType::Alternative,
-        //                     "SPIN_OFF" => RelationType::SpinOff,
-        //                     "OTHER" => RelationType::Other,
-        //                     "COMPILATION" => RelationType::Compilation,
-        //                     "CONTAINS" => RelationType::Contains,
-        //                     _ => RelationType::Source,
-        //                 },
-        //                 is_main_studio: edge["isMainStudio"].as_bool().unwrap(),
-        //             });
-        //         }
-        //
-        //         anime.relations = Some(relations);
-        //     }
-        // }
+        if let Some(relations) = data["relations"].as_object() {
+            if let Some(edges) = relations["edges"].as_array() {
+                let mut relations: Vec<Relation> = Vec::with_capacity(edges.len());
+
+                for edge in edges {
+                    let node = edge.get("node").unwrap();
+                    let media_type = match node["type"].as_str().unwrap() {
+                        "ANIME" => MediaType::Anime,
+                        "MANGA" => MediaType::Manga,
+                        _ => MediaType::default(),
+                    };
+                    relations.push(Relation {
+                        media_type: media_type,
+                        anime: match media_type {
+                            MediaType::Anime => Some(Anime::parse(node)),
+                            _ => None,
+                        },
+                        manga: match media_type {
+                            MediaType::Manga => Some(Manga::parse(node)),
+                            _ => None,
+                        },
+                        id: edge["id"].as_i64().unwrap(),
+                        relation_type: match edge["relationType"].as_str().unwrap() {
+                            "ADAPTATION" => RelationType::Adaptation,
+                            "PREQUEL" => RelationType::Prequel,
+                            "SEQUEL" => RelationType::Sequel,
+                            "PARENT" => RelationType::Parent,
+                            "SIDE_STORY" => RelationType::SideStory,
+                            "CHARACTER" => RelationType::Character,
+                            "SUMMARY" => RelationType::Summary,
+                            "ALTERNATIVE" => RelationType::Alternative,
+                            "SPIN_OFF" => RelationType::SpinOff,
+                            "OTHER" => RelationType::Other,
+                            "COMPILATION" => RelationType::Compilation,
+                            "CONTAINS" => RelationType::Contains,
+                            _ => RelationType::Source,
+                        },
+                        is_main_studio: edge["isMainStudio"].as_bool().unwrap(),
+                    });
+                }
+
+                anime.relations = Some(relations);
+            }
+        }
 
         if let Some(characters) = data["characters"].as_object() {
             if let Some(nodes) = characters["nodes"].as_array() {
                 let mut characters: Vec<Character> = Vec::with_capacity(nodes.len());
 
                 for node in nodes {
-                    characters.push(Character::parse(node, None));
+                    characters.push(Character::parse(node));
                 }
 
                 anime.characters = Some(characters);
@@ -439,9 +450,22 @@ impl Anime {
 
         anime
     }
+
+    pub async fn load_full(self) -> crate::Result<Self> {
+        if !self.is_full_loaded {
+            let mut anime = crate::Client::new()
+                .get_anime(serde_json::json!({"id": self.id}))
+                .await
+                .unwrap();
+            anime.is_full_loaded = true;
+            Ok(anime)
+        } else {
+            panic!("This anime is already full loaded")
+        }
+    }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct AiringEpisode {
     id: i64,
     at: i64,

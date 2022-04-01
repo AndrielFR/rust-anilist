@@ -4,7 +4,7 @@
 use crate::models::Color;
 use crate::models::Language;
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Default, Clone, PartialEq)]
 pub struct Link {
     pub id: Option<i64>,
     pub title: Option<String>,
@@ -18,7 +18,7 @@ pub struct Link {
     pub icon: Option<String>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Type {
     Info,
     Streaming,

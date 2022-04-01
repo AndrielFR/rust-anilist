@@ -1,15 +1,19 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2022 Andriel Ferreira <https://github.com/AndrielFR>
 
+use crate::models::Anime;
+use crate::models::Character;
 use crate::models::Color;
 use crate::models::Format;
 use crate::models::Image;
-use crate::models::Model;
+use crate::models::Manga;
 use crate::models::NotificationOption;
+use crate::models::Person;
 use crate::models::Status;
+use crate::models::Studio;
 use crate::models::{Score, ScoreFormat};
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Default, Clone, PartialEq)]
 pub struct User {
     id: i32,
     name: String,
@@ -36,7 +40,7 @@ impl User {
     }
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Default, Clone, PartialEq)]
 struct Options {
     title_language: UserTitleLanguage,
     display_adult_content: bool,
@@ -50,7 +54,7 @@ struct Options {
     disabled_list_activity: Vec<ListActivityOption>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum UserTitleLanguage {
     Romaji,
     English,
@@ -66,7 +70,7 @@ impl Default for UserTitleLanguage {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum UserStaffNameLanguage {
     RomajiWestern,
     Romaji,
@@ -79,13 +83,13 @@ impl Default for UserStaffNameLanguage {
     }
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Default, Clone, PartialEq)]
 pub struct ListActivityOption {
     status: Status,
     disabled: bool,
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Default, Clone, PartialEq)]
 pub struct MediaListOptions {
     score_format: ScoreFormat,
     row_order: String,
@@ -93,7 +97,7 @@ pub struct MediaListOptions {
     manga_list: MediaListTypeOptions,
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Default, Clone, PartialEq)]
 pub struct MediaListTypeOptions {
     section_order: Vec<String>,
     split_completed_section_by_format: bool,
@@ -102,22 +106,22 @@ pub struct MediaListTypeOptions {
     advanced_scoring_enabled: bool,
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Default, Clone, PartialEq)]
 pub struct Favourites {
-    anime: Vec<Model>,
-    manga: Vec<Model>,
-    characters: Vec<Model>,
-    staff: Vec<Model>,
-    studios: Vec<Model>,
+    anime: Vec<Anime>,
+    manga: Vec<Manga>,
+    characters: Vec<Character>,
+    staff: Vec<Person>,
+    studios: Vec<Studio>,
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Default, Clone, PartialEq)]
 pub struct UserStatisticTypes {
     anime: UserStatistics,
     manga: UserStatistics,
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Default, Clone, PartialEq)]
 pub struct UserStatistics {
     count: i32,
     score: Score,
@@ -130,7 +134,7 @@ pub struct UserStatistics {
     statuses: Vec<UserStatusStatistic>,
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Default, Clone, PartialEq)]
 pub struct UserFormatStatistic {
     count: i32,
     score: Score,
@@ -140,7 +144,7 @@ pub struct UserFormatStatistic {
     format: Format,
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Default, Clone, PartialEq)]
 pub struct UserStatusStatistic {
     count: i32,
     score: Score,
