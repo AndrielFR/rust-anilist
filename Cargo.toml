@@ -4,7 +4,7 @@ version = "0.1.0"
 authors = ["Andriel Ferreira <andrielkogama2@gmail.com>"]
 license = "MTI"
 description = """
-Just a Anilist wrapper.
+Just an Anilist wrapper.
 """
 homepage = "https://github.com/AndrielFR/rust-anilist"
 repository = "https://github.com/AndrielFR/rust-anilist"
