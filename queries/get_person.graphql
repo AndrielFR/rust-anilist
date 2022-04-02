@@ -39,28 +39,32 @@ query ($id: Int) {
    isFavouriteBlocked
    siteUrl
    staffMedia(sort: POPULARITY) {
-     nodes {
+     edges {
+       node {
+         id
+         idMal
+         title {
+           romaji
+           english
+           native
+           userPreferred
+         }
+         type
+         format
+         status(version: 2)
+         description(asHtml: true)
+         coverImage {
+           extraLarge
+           large
+           medium
+           color
+         }
+         bannerImage
+         averageScore
+         meanScore
+       }
        id
-       idMal
-       title {
-         romaji
-         english
-         native
-         userPreferred
-       }
-       type
-       format
-       status(version: 2)
-       description(asHtml: true)
-       coverImage {
-         extraLarge
-         large
-         medium
-         color
-       }
-       bannerImage
-       averageScore
-       meanScore
+       staffRole
      }
    }
    characters(sort: RELEVANCE) {
