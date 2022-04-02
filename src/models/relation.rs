@@ -5,6 +5,7 @@ use crate::models::Anime;
 use crate::models::Manga;
 use crate::models::MediaType;
 
+// TODO: Use generic type
 #[derive(Debug, Clone, PartialEq)]
 pub struct Relation {
     pub media_type: MediaType,

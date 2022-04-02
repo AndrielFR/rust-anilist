@@ -323,7 +323,7 @@ impl Manga {
                 let mut staff: Vec<Person> = Vec::with_capacity(nodes.len());
 
                 for node in nodes {
-                    staff.push(Person::parse(node, None));
+                    staff.push(Person::parse(node));
                 }
 
                 manga.staff = Some(staff);

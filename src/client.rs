@@ -68,10 +68,21 @@ impl Client {
         self.get_character(variables).await
     }
 
+    pub async fn get_person(&self, id: i64) -> Result<crate::models::Person> {
+        let data = self
+            .request("person", "get", serde_json::json!({ "id": id }))
+            .await
+            .unwrap();
+        let mut person = crate::models::Person::parse(&data["data"]["Staff"]);
+        person.is_full_loaded = true;
+
+        Ok(person)
+    }
+
     pub async fn mutate(
         &self,
         _media_type: &str,
-        _id: i32,
+        _id: i64,
         _variables: serde_json::Value,
     ) -> Result<bool> {
         todo!()
