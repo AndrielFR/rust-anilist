@@ -369,14 +369,34 @@ impl Manga {
                         _ => Some(LinkType::default()),
                     },
                     language: match external_link["language"].as_str() {
-                        Some(language) => {
-                            // TODO: Add rest
-                            match language {
-                                "ENGLISH" => Some(Language::English),
-                                "KOREAN" => Some(Language::Korean),
-                                _ => Some(Language::default()),
-                            }
-                        }
+                        Some(language) => match language.to_uppercase().as_str() {
+                            "ENGLISH" => Some(Language::English),
+                            "KOREAN" => Some(Language::Korean),
+                            "ITALIAN" => Some(Language::Italian),
+                            "SPANISH" => Some(Language::Spanish),
+                            "PORTUGUESE" => Some(Language::Portuguese),
+                            "FRENCH" => Some(Language::French),
+                            "GERMAN" => Some(Language::German),
+                            "HEBREW" => Some(Language::Hebrew),
+                            "HUNGARIAN" => Some(Language::Hungarian),
+                            "CHINESE" => Some(Language::Chinese),
+                            "ARABIC" => Some(Language::Arabic),
+                            "FILIPINO" => Some(Language::Filipino),
+                            "CATALAN" => Some(Language::Catalan),
+                            "FINNISH" => Some(Language::Finnish),
+                            "TURKISH" => Some(Language::Turkish),
+                            "DUTCH" => Some(Language::Dutch),
+                            "SWEDISH" => Some(Language::Swedish),
+                            "THAI" => Some(Language::Thai),
+                            "TAGALOG" => Some(Language::Tagalog),
+                            "MALAYSIAN" => Some(Language::Malaysian),
+                            "INDONESIAN" => Some(Language::Indonesian),
+                            "VIETNAMESE" => Some(Language::Vietnamese),
+                            "NEPALI" => Some(Language::Nepali),
+                            "HINDI" => Some(Language::Hindi),
+                            "URDU" => Some(Language::Urdu),
+                            _ => Some(Language::default()),
+                        },
                         None => None,
                     },
                     color: external_link["color"]
