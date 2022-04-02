@@ -71,10 +71,7 @@ impl Manga {
         let title = data["title"].as_object().unwrap();
         manga.title = Title {
             romaji: Some(title["romaji"].as_str().unwrap().to_string()),
-            english: match title["english"].as_str() {
-                Some(title) => Some(title.to_string()),
-                None => None,
-            },
+            english: title["english"].as_str().map(|title| title.to_string()),
             native: title["native"].as_str().unwrap().to_string(),
             user_preferred: Some(title["userPreferred"].as_str().unwrap().to_string()),
         };
@@ -276,7 +273,7 @@ impl Manga {
                         _ => MediaType::default(),
                     };
                     relations.push(Relation {
-                        media_type: media_type,
+                        media_type,
                         anime: match media_type {
                             MediaType::Anime => Some(Anime::parse(node)),
                             _ => None,
@@ -382,14 +379,10 @@ impl Manga {
                         }
                         None => None,
                     },
-                    color: match external_link["color"].as_str() {
-                        Some(hex) => Some(Color::Hex(hex.to_string())),
-                        None => None,
-                    },
-                    icon: match external_link["icon"].as_str() {
-                        Some(url) => Some(url.to_string()),
-                        None => None,
-                    },
+                    color: external_link["color"]
+                        .as_str()
+                        .map(|hex| Color::Hex(hex.to_string())),
+                    icon: external_link["icon"].as_str().map(|url| url.to_string()),
                     ..Default::default()
                 })
             }
