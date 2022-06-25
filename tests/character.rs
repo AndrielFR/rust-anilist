@@ -10,7 +10,9 @@ async fn get_character() {
 
 #[tokio::test]
 async fn get_char() {
-    let character = Client::default().get_char(serde_json::json!({"id": 40})).await;
+    let character = Client::default()
+        .get_char(serde_json::json!({"id": 40}))
+        .await;
     assert!(character.is_ok())
 }
 

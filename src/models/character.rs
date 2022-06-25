@@ -33,31 +33,43 @@ impl Character {
     pub(crate) fn parse(data: &serde_json::Value) -> Self {
         Self {
             id: data["id"].as_i64().unwrap(),
-            name: data["name"].as_object().map(|object| {
-                Name {
+            name: data["name"]
+                .as_object()
+                .map(|object| Name {
                     first: object["first"].as_str().unwrap().to_string(),
                     middle: object["middle"].as_str().map(String::from),
                     last: object["last"].as_str().map(String::from),
                     full: object["full"].as_str().unwrap().to_string(),
                     native: object["native"].as_str().map(String::from),
-                    alternative: object["alternative"].as_array().unwrap().into_iter().map(|item| item.as_str().unwrap().to_string()).collect::<Vec<String>>(),
-                    alternative_spoiler: object["alternativeSpoiler"].as_array().unwrap().into_iter().map(|item| item.as_str().unwrap().to_string()).collect::<Vec<String>>(),
+                    alternative: object["alternative"]
+                        .as_array()
+                        .unwrap()
+                        .into_iter()
+                        .map(|item| item.as_str().unwrap().to_string())
+                        .collect::<Vec<String>>(),
+                    alternative_spoiler: object["alternativeSpoiler"]
+                        .as_array()
+                        .unwrap()
+                        .into_iter()
+                        .map(|item| item.as_str().unwrap().to_string())
+                        .collect::<Vec<String>>(),
                     user_preferred: object["userPreferred"].as_str().map(String::from),
-                }
-            }).unwrap(),
-            role: data["role"].as_str().map(|role| {
-                match role.to_ascii_lowercase().as_str() {
+                })
+                .unwrap(),
+            role: data["role"]
+                .as_str()
+                .map(|role| match role.to_ascii_lowercase().as_str() {
                     "main" => Role::Main,
                     "supporting" => Role::Supporting,
                     _ => Role::default(),
-                }
-            }),
-            image: data["image"].as_object().map(|object| {
-                Image {
+                }),
+            image: data["image"]
+                .as_object()
+                .map(|object| Image {
                     large: object["large"].as_str().unwrap().to_string(),
                     medium: object["medium"].as_str().unwrap().to_string(),
-                }
-            }).unwrap(),
+                })
+                .unwrap(),
             description: data["description"].as_str().unwrap().to_string(),
             gender: data["gender"].as_str().map(|gender| {
                 match gender.to_ascii_lowercase().as_str() {
@@ -69,9 +81,9 @@ impl Character {
             }),
             date_of_birth: data["dateOfBirth"].as_object().map(|object| {
                 Date {
-                    year: object["year"].as_i64(), // TODO: Use u64
+                    year: object["year"].as_i64(),   // TODO: Use u64
                     month: object["month"].as_i64(), // Same as above
-                    day: object["day"].as_i64(), // Same as above
+                    day: object["day"].as_i64(),     // Same as above
                 }
             }),
             age: data["age"].as_str().map(String::from),
