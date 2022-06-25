@@ -13,3 +13,4 @@ Copyright © 2022 [AndrielFR](https://github.com/AndrielFR)
 Licensed under the [Expat/MIT license](LICENSE).
 This project is also [REUSE compliant](https://reuse.software/).
 See individual files for more copyright information.
+a.rs

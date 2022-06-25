@@ -417,7 +417,7 @@ impl Manga {
 
     pub async fn load_full(self) -> crate::Result<Self> {
         if !self.is_full_loaded {
-            let mut manga = crate::Client::new()
+            let mut manga = crate::Client::default()
                 .get_manga(serde_json::json!({"id": self.id}))
                 .await
                 .unwrap();

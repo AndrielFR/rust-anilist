@@ -7,7 +7,7 @@ use crate::models::Image;
 use crate::models::Name;
 use crate::models::Person;
 
-use crate::Result;
+use crate::{Client, Result};
 
 #[derive(Debug, Default, Clone, PartialEq)]
 pub struct Character {
@@ -31,152 +31,87 @@ pub struct Character {
 
 impl Character {
     pub(crate) fn parse(data: &serde_json::Value) -> Self {
-        let mut character = Character::default();
-
-        character.id = data["id"].as_i64().unwrap();
-
-        if let Some(name_object) = data["name"].as_object() {
-            let mut name = Name::default();
-
-            name.first = name_object["first"].as_str().unwrap().to_string();
-
-            if let Some(middle) = name_object["middle"].as_str() {
-                name.middle = Some(middle.to_string());
-            }
-
-            if let Some(last) = name_object["last"].as_str() {
-                name.last = Some(last.to_string());
-            }
-
-            name.full = name_object["full"].as_str().unwrap().to_string();
-
-            if let Some(native) = name_object["native"].as_str() {
-                name.native = Some(native.to_string());
-            }
-
-            if let Some(alternative_array) = name_object["alternative"].as_array() {
-                let mut alternative = Vec::with_capacity(alternative_array.len());
-
-                for alternative_name in alternative_array {
-                    alternative.push(alternative_name.as_str().unwrap().to_string());
+        Self {
+            id: data["id"].as_i64().unwrap(),
+            name: data["name"].as_object().map(|object| {
+                Name {
+                    first: object["first"].as_str().unwrap().to_string(),
+                    middle: object["middle"].as_str().map(String::from),
+                    last: object["last"].as_str().map(String::from),
+                    full: object["full"].as_str().unwrap().to_string(),
+                    native: object["native"].as_str().map(String::from),
+                    alternative: object["alternative"].as_array().unwrap().into_iter().map(|item| item.as_str().unwrap().to_string()).collect::<Vec<String>>(),
+                    alternative_spoiler: object["alternativeSpoiler"].as_array().unwrap().into_iter().map(|item| item.as_str().unwrap().to_string()).collect::<Vec<String>>(),
+                    user_preferred: object["userPreferred"].as_str().map(String::from),
                 }
-
-                name.alternative = alternative;
-            }
-
-            if let Some(alternative_spoiler_array) = name_object["alternativeSpoiler"].as_array() {
-                let mut alternative_spoiler = Vec::with_capacity(alternative_spoiler_array.len());
-
-                for alternative_spoiler_name in alternative_spoiler_array {
-                    alternative_spoiler
-                        .push(alternative_spoiler_name.as_str().unwrap().to_string());
+            }).unwrap(),
+            role: data["role"].as_str().map(|role| {
+                match role.to_ascii_lowercase().as_str() {
+                    "main" => Role::Main,
+                    "supporting" => Role::Supporting,
+                    _ => Role::default(),
                 }
-
-                name.alternative_spoiler = alternative_spoiler;
-            }
-
-            if let Some(user_preferred) = name_object["userPreferred"].as_str() {
-                name.user_preferred = Some(user_preferred.to_string());
-            }
-
-            character.name = name;
+            }),
+            image: data["image"].as_object().map(|object| {
+                Image {
+                    large: object["large"].as_str().unwrap().to_string(),
+                    medium: object["medium"].as_str().unwrap().to_string(),
+                }
+            }).unwrap(),
+            description: data["description"].as_str().unwrap().to_string(),
+            gender: data["gender"].as_str().map(|gender| {
+                match gender.to_ascii_lowercase().as_str() {
+                    "male" => Gender::Male,
+                    "female" => Gender::Female,
+                    "nonbinary" => Gender::NonBinary,
+                    _ => Gender::Other(gender.to_string()),
+                }
+            }),
+            date_of_birth: data["dateOfBirth"].as_object().map(|object| {
+                Date {
+                    year: object["year"].as_i64(), // TODO: Use u64
+                    month: object["month"].as_i64(), // Same as above
+                    day: object["day"].as_i64(), // Same as above
+                }
+            }),
+            age: data["age"].as_str().map(String::from),
+            blood_type: data["bloodType"].as_str().map(String::from),
+            is_favourite: data["isFavourite"].as_bool(),
+            is_favourite_blocked: data["isFavouriteBlocked"].as_bool(),
+            url: data["siteUrl"].as_str().unwrap().to_string(),
+            favourites: data["favourites"].as_i64(),
+            mod_notes: data["modNotes"].as_str().map(String::from),
+            ..Default::default()
         }
-
-        if let Some(image_object) = data["image"].as_object() {
-            let mut image = Image::default();
-
-            if let Some(large) = image_object["large"].as_str() {
-                image.large = large.to_string();
-            }
-
-            if let Some(medium) = image_object["medium"].as_str() {
-                image.medium = medium.to_string();
-            }
-
-            character.image = image;
-        }
-
-        character.description = data["description"].as_str().unwrap().to_string();
-
-        if let Some(gender) = data["gender"].as_str() {
-            character.gender = match gender {
-                "Male" => Some(Gender::Male),
-                "Femalm" => Some(Gender::Female),
-                "NonBinary" => Some(Gender::NonBinary),
-                other => Some(Gender::Other(other.to_string())),
-            };
-        }
-
-        if let Some(date_of_birth) = data["dateOfBirth"].as_object() {
-            let mut date = Date::default();
-
-            if let Some(year) = date_of_birth["year"].as_i64() {
-                date.year = Some(year);
-            }
-
-            if let Some(month) = date_of_birth["month"].as_i64() {
-                date.month = Some(month);
-            }
-
-            if let Some(day) = date_of_birth["day"].as_i64() {
-                date.day = Some(day);
-            }
-
-            character.date_of_birth = Some(date);
-        }
-
-        if let Some(age) = data["age"].as_str() {
-            character.age = Some(age.to_string());
-        }
-
-        if let Some(blood_type) = data["bloodType"].as_str() {
-            character.blood_type = Some(blood_type.to_string());
-        }
-
-        if let Some(is_favourite) = data["isFavourite"].as_bool() {
-            character.is_favourite = Some(is_favourite);
-        }
-
-        if let Some(is_favourite_blocked) = data["isFavouriteBlocked"].as_bool() {
-            character.is_favourite_blocked = Some(is_favourite_blocked);
-        }
-
-        character.url = data["siteUrl"].as_str().unwrap().to_string();
-
-        if let Some(favourites) = data["favourites"].as_i64() {
-            character.favourites = Some(favourites);
-        }
-
-        if let Some(mod_notes) = data["modNotes"].as_str() {
-            character.mod_notes = Some(mod_notes.to_string());
-        }
-
-        character
     }
 
-    pub async fn load_full(self) -> crate::Result<Self> {
+    pub async fn load_full(self, client: &Client) -> Result<Self> {
         if !self.is_full_loaded {
-            let mut character = crate::Client::new()
+            let mut character = client
                 .get_character(serde_json::json!({"id": self.id}))
-                .await
-                .unwrap();
+                .await?;
             character.is_full_loaded = true;
+
             Ok(character)
         } else {
             panic!("This character is already full loaded")
         }
     }
 
-    pub async fn get_medias<T>() -> Result<T> {
-        todo!()
+    pub async fn get_medias<T>(&self) -> Result<T> {
+        unimplemented!()
+    }
+
+    pub fn is_full_loaded(&self) -> bool {
+        self.is_full_loaded
     }
 }
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Role {
+    Background,
     Main,
     Supporting,
-    Background,
 }
 
 impl Default for Role {

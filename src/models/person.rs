@@ -202,7 +202,7 @@ impl Person {
 
     pub async fn load_full(self) -> crate::Result<Self> {
         if !self.is_full_loaded {
-            let mut person = crate::Client::new().get_person(self.id).await.unwrap();
+            let mut person = crate::Client::default().get_person(self.id).await.unwrap();
             person.is_full_loaded = true;
             Ok(person)
         } else {
@@ -211,10 +211,10 @@ impl Person {
     }
 
     pub async fn get_medias<T>() -> Result<T> {
-        todo!()
+        unimplemented!()
     }
 
     pub async fn get_character_medias<T>(_character_id: i64) -> Result<T> {
-        todo!()
+        unimplemented!()
     }
 }

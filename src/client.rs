@@ -23,10 +23,6 @@ impl Default for Client {
 }
 
 impl Client {
-    pub fn new() -> Self {
-        Client::default()
-    }
-
     pub fn api_token(mut self, token: &str) -> Self {
         self.api_token = Some(token.to_string());
         self
@@ -79,22 +75,13 @@ impl Client {
         Ok(person)
     }
 
-    pub async fn mutate(
-        &self,
-        _media_type: &str,
-        _id: i64,
-        _variables: serde_json::Value,
-    ) -> Result<bool> {
-        todo!()
-    }
-
     pub async fn search_anime(
         &self,
         variables: serde_json::Value,
     ) -> Option<Vec<crate::models::Anime>> {
         let result = self.request("anime", "search", variables).await.unwrap();
         let mut _models = Vec::<crate::models::Anime>::new();
-        todo!()
+        unimplemented!()
     }
 
     pub(crate) async fn request(
@@ -103,37 +90,32 @@ impl Client {
         action: &str,
         variables: serde_json::Value,
     ) -> std::result::Result<serde_json::Value, reqwest::Error> {
-        let query = Client::get_query(media_type, action);
+        let query = Client::get_query(media_type, action).unwrap();
         let json = serde_json::json!({"query": query, "variables": variables});
-        let body = reqwest::Client::new()
+        let mut body = reqwest::Client::new()
             .post("https://graphql.anilist.co/")
             .header("Content-Type", "application/json")
             .header("Accept", "application/json")
             .timeout(Duration::from_secs(self.timeout))
             .body(json.to_string());
 
-        let body = match &self.api_token {
-            Some(token) => body.bearer_auth(token),
-            None => body,
-        };
+        if let Some(token) = &self.api_token {
+            body = body.bearer_auth(token);
+        }
 
         let response = body.send().await?.text().await?;
         let result: serde_json::Value = serde_json::from_str(&response).unwrap();
+
         Ok(result)
     }
 
-    pub fn get_query(media_type: &str, action: &str) -> String {
+    pub fn get_query(media_type: &str, action: &str) -> Result<String> {
         let mut graphql_query = String::new();
 
         let media_type = media_type.to_lowercase();
-        match media_type.as_str() {
-            "anime" => {}
-            "manga" => {}
-            "character" => {}
-            "user" => {}
-            "person" => {}
-            "studio" => {}
-            _ => panic!("The media_type '{}' does not exits!", { media_type }),
+        let media_types = vec!["anime", "manga", "character", "user", "person", "studio"];
+        if !media_types.contains(&media_type.as_str()) {
+            panic!("The media type '{}' does not exits", { media_type });
         }
 
         let file_name = format!("{}_{}.graphql", action, media_type);
@@ -142,6 +124,6 @@ impl Client {
             .and_then(|mut file| file.read_to_string(&mut graphql_query))
             .unwrap();
 
-        graphql_query
+        Ok(graphql_query)
     }
 }
