@@ -1,8 +1,12 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2022 Andriel Ferreira <https://github.com/AndrielFR>
 
-#[derive(Debug, Clone, PartialEq)]
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Default, Clone, PartialEq, Deserialize, Serialize)]
+#[serde(rename_all(deserialize = "SCREAMING_SNAKE_CASE"))]
 pub enum Source {
+    #[default]
     Original,
     Manga,
     LightNovel,
@@ -18,10 +22,4 @@ pub enum Source {
     Comic,
     MultimediaProject,
     PictureBook,
-}
-
-impl Default for Source {
-    fn default() -> Self {
-        Source::Original
-    }
 }

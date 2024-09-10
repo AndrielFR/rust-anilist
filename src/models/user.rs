@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2022 Andriel Ferreira <https://github.com/AndrielFR>
 
+use serde::Deserialize;
+use serde::Serialize;
+
 use crate::models::Anime;
 use crate::models::Character;
 use crate::models::Color;
@@ -11,9 +14,9 @@ use crate::models::NotificationOption;
 use crate::models::Person;
 use crate::models::Status;
 use crate::models::Studio;
-use crate::models::{Score, ScoreFormat};
 
-#[derive(Debug, Default, Clone, PartialEq)]
+#[derive(Debug, Default, Clone, PartialEq, Deserialize, Serialize)]
+#[serde(rename_all(deserialize = "camelCase"))]
 pub struct User {
     id: i32,
     name: String,
@@ -29,18 +32,8 @@ pub struct User {
     statistics: UserStatisticTypes,
 }
 
-impl User {
-    pub(crate) fn parse(data: &serde_json::Value, user: Option<User>) -> Self {
-        let mut user = match user {
-            Some(user) => user,
-            None => User::default(),
-        };
-
-        user
-    }
-}
-
-#[derive(Debug, Default, Clone, PartialEq)]
+#[derive(Debug, Default, Clone, PartialEq, Deserialize, Serialize)]
+#[serde(rename_all(deserialize = "camelCase"))]
 struct Options {
     title_language: UserTitleLanguage,
     display_adult_content: bool,
@@ -54,8 +47,10 @@ struct Options {
     disabled_list_activity: Vec<ListActivityOption>,
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Default, Clone, PartialEq, Deserialize, Serialize)]
+#[serde(rename_all(deserialize = "SCREAMING_SNAKE_CASE"))]
 pub enum UserTitleLanguage {
+    #[default]
     Romaji,
     English,
     Native,
@@ -64,40 +59,32 @@ pub enum UserTitleLanguage {
     NativeStylised,
 }
 
-impl Default for UserTitleLanguage {
-    fn default() -> Self {
-        UserTitleLanguage::Romaji
-    }
-}
-
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Default, Clone, PartialEq, Deserialize, Serialize)]
+#[serde(rename_all(deserialize = "SCREAMING_SNAKE_CASE"))]
 pub enum UserStaffNameLanguage {
     RomajiWestern,
+    #[default]
     Romaji,
     Native,
 }
 
-impl Default for UserStaffNameLanguage {
-    fn default() -> Self {
-        UserStaffNameLanguage::Romaji
-    }
-}
-
-#[derive(Debug, Default, Clone, PartialEq)]
+#[derive(Debug, Default, Clone, PartialEq, Deserialize, Serialize)]
+#[serde(rename_all(deserialize = "camelCase"))]
 pub struct ListActivityOption {
     status: Status,
     disabled: bool,
 }
 
-#[derive(Debug, Default, Clone, PartialEq)]
+#[derive(Debug, Default, Clone, PartialEq, Deserialize, Serialize)]
+#[serde(rename_all(deserialize = "camelCase"))]
 pub struct MediaListOptions {
-    score_format: ScoreFormat,
     row_order: String,
     anime_list: MediaListTypeOptions,
     manga_list: MediaListTypeOptions,
 }
 
-#[derive(Debug, Default, Clone, PartialEq)]
+#[derive(Debug, Default, Clone, PartialEq, Deserialize, Serialize)]
+#[serde(rename_all(deserialize = "camelCase"))]
 pub struct MediaListTypeOptions {
     section_order: Vec<String>,
     split_completed_section_by_format: bool,
@@ -106,7 +93,8 @@ pub struct MediaListTypeOptions {
     advanced_scoring_enabled: bool,
 }
 
-#[derive(Debug, Default, Clone, PartialEq)]
+#[derive(Debug, Default, Clone, PartialEq, Deserialize, Serialize)]
+#[serde(rename_all(deserialize = "camelCase"))]
 pub struct Favourites {
     anime: Vec<Anime>,
     manga: Vec<Manga>,
@@ -115,16 +103,17 @@ pub struct Favourites {
     studios: Vec<Studio>,
 }
 
-#[derive(Debug, Default, Clone, PartialEq)]
+#[derive(Debug, Default, Clone, PartialEq, Deserialize, Serialize)]
+#[serde(rename_all(deserialize = "camelCase"))]
 pub struct UserStatisticTypes {
     anime: UserStatistics,
     manga: UserStatistics,
 }
 
-#[derive(Debug, Default, Clone, PartialEq)]
+#[derive(Debug, Default, Clone, PartialEq, Deserialize, Serialize)]
+#[serde(rename_all(deserialize = "camelCase"))]
 pub struct UserStatistics {
     count: i32,
-    score: Score,
     standard_deviation: f32,
     minutes_watched: Option<i32>,
     episodes_watched: Option<i32>,
@@ -134,20 +123,20 @@ pub struct UserStatistics {
     statuses: Vec<UserStatusStatistic>,
 }
 
-#[derive(Debug, Default, Clone, PartialEq)]
+#[derive(Debug, Default, Clone, PartialEq, Deserialize, Serialize)]
+#[serde(rename_all(deserialize = "camelCase"))]
 pub struct UserFormatStatistic {
     count: i32,
-    score: Score,
     minutes_watched: Option<i32>,
     chapters_read: Option<i32>,
     media_ids: Vec<i32>,
     format: Format,
 }
 
-#[derive(Debug, Default, Clone, PartialEq)]
+#[derive(Debug, Default, Clone, PartialEq, Deserialize, Serialize)]
+#[serde(rename_all(deserialize = "camelCase"))]
 pub struct UserStatusStatistic {
     count: i32,
-    score: Score,
     minutes_watched: Option<i32>,
     chapters_read: Option<i32>,
     media_ids: Vec<i32>,

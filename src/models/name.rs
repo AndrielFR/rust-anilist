@@ -1,7 +1,10 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2022 Andriel Ferreira <https://github.com/AndrielFR>
 
-#[derive(Debug, Default, Clone, PartialEq)]
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Default, Clone, PartialEq, Deserialize, Serialize)]
+#[serde(rename_all(deserialize = "camelCase"))]
 pub struct Name {
     pub first: String,
     pub middle: Option<String>,
@@ -9,6 +12,6 @@ pub struct Name {
     pub full: String,
     pub native: Option<String>,
     pub alternative: Vec<String>,
-    pub alternative_spoiler: Vec<String>,
+    pub alternative_spoiler: Option<Vec<String>>,
     pub user_preferred: Option<String>,
 }

@@ -12,5 +12,5 @@ pub mod models;
 mod client;
 mod error;
 
-pub use self::client::Client;
-pub use self::error::{Error, Result};
+pub use client::Client;
+pub use error::{Error, Result};

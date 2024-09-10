@@ -1,8 +1,12 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2022 Andriel Ferreira <https://github.com/AndrielFR>
 
-#[derive(Debug, Clone, PartialEq)]
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Default, Clone, PartialEq, Deserialize, Serialize)]
+#[serde(rename_all(deserialize = "SCREAMING_SNAKE_CASE"))]
 pub enum Format {
+    #[default]
     Tv,
     TvShort,
     Movie,
@@ -13,10 +17,4 @@ pub enum Format {
     Manga,
     Novel,
     OneShot,
-}
-
-impl Default for Format {
-    fn default() -> Self {
-        Format::Tv
-    }
 }

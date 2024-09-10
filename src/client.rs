@@ -5,6 +5,7 @@ use std::fs::File;
 use std::io::Read;
 use std::time::Duration;
 
+use crate::models::{Anime, Character, Manga, Person};
 use crate::Result;
 
 #[derive(Clone)]
@@ -35,7 +36,7 @@ impl Client {
 
     pub async fn get_anime(&self, variables: serde_json::Value) -> Result<crate::models::Anime> {
         let data = self.request("anime", "get", variables).await.unwrap();
-        let mut anime = crate::models::Anime::parse(&data["data"]["Media"]);
+        let mut anime = serde_json::from_str::<Anime>(&data["data"]["Media"].to_string()).unwrap();
         anime.is_full_loaded = true;
 
         Ok(anime)
@@ -43,7 +44,7 @@ impl Client {
 
     pub async fn get_manga(&self, variables: serde_json::Value) -> Result<crate::models::Manga> {
         let data = self.request("manga", "get", variables).await.unwrap();
-        let mut manga = crate::models::Manga::parse(&data["data"]["Media"]);
+        let mut manga = serde_json::from_str::<Manga>(&data["data"]["Media"].to_string()).unwrap();
         manga.is_full_loaded = true;
 
         Ok(manga)
@@ -54,7 +55,8 @@ impl Client {
         variables: serde_json::Value,
     ) -> Result<crate::models::Character> {
         let data = self.request("character", "get", variables).await.unwrap();
-        let mut character = crate::models::Character::parse(&data["data"]["Character"]);
+        let mut character =
+            serde_json::from_str::<Character>(&data["data"]["Character"].to_string()).unwrap();
         character.is_full_loaded = true;
 
         Ok(character)
@@ -69,7 +71,8 @@ impl Client {
             .request("person", "get", serde_json::json!({ "id": id }))
             .await
             .unwrap();
-        let mut person = crate::models::Person::parse(&data["data"]["Staff"]);
+        let mut person =
+            serde_json::from_str::<Person>(&data["data"]["Staff"].to_string()).unwrap();
         person.is_full_loaded = true;
 
         Ok(person)
@@ -109,11 +112,11 @@ impl Client {
         Ok(result)
     }
 
-    pub fn get_query(media_type: &str, action: &str) -> Result<String> {
+    pub(crate) fn get_query(media_type: &str, action: &str) -> Result<String> {
         let mut graphql_query = String::new();
 
         let media_type = media_type.to_lowercase();
-        let media_types = vec!["anime", "manga", "character", "user", "person", "studio"];
+        let media_types = ["anime", "manga", "character", "user", "person", "studio"];
         if !media_types.contains(&media_type.as_str()) {
             panic!("The media type '{}' does not exits", { media_type });
         }

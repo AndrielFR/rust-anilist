@@ -16,7 +16,6 @@ mod name;
 mod notification;
 mod person;
 mod relation;
-mod score;
 mod season;
 mod source;
 mod status;
@@ -40,8 +39,8 @@ pub use name::Name;
 pub use notification::{Notification, NotificationOption, Type as NotificationType};
 pub use person::Person;
 pub use relation::{Relation, Type as RelationType};
-pub use score::{Format as ScoreFormat, Score};
 pub use season::Season;
+use serde::{Deserialize, Serialize};
 pub use source::Source;
 pub use status::Status;
 pub use studio::Studio;
@@ -49,15 +48,10 @@ pub use tag::Tag;
 pub use title::Title;
 pub use user::User;
 
-#[derive(Debug, Copy, Clone, PartialEq)]
+#[derive(Debug, Default, Clone, PartialEq, Deserialize, Serialize)]
 pub enum MediaType {
     Anime,
     Manga,
+    #[default]
     Unknown,
-}
-
-impl Default for MediaType {
-    fn default() -> Self {
-        MediaType::Unknown
-    }
 }

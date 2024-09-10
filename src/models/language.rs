@@ -1,9 +1,12 @@
 // SPDX-License-Identifier: MIT
-//
 // Copyright (c) 2022 Andriel Ferreira <https://github.com/AndrielFR>
 
-#[derive(Debug, Clone, PartialEq)]
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Default, Clone, PartialEq, Deserialize, Serialize)]
+#[serde(rename_all(deserialize = "PascalCase"))]
 pub enum Language {
+    #[default]
     Japanese,
     English,
     Korean,
@@ -30,10 +33,4 @@ pub enum Language {
     Nepali,
     Hindi,
     Urdu,
-}
-
-impl Default for Language {
-    fn default() -> Self {
-        Language::Japanese
-    }
 }
