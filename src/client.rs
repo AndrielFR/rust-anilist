@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2022 Andriel Ferreira <https://github.com/AndrielFR>
 
-use std::fs::File;
-use std::io::Read;
 use std::time::Duration;
 
 use crate::models::{Anime, Character, Manga, Person};
@@ -113,19 +111,21 @@ impl Client {
     }
 
     pub(crate) fn get_query(media_type: &str, action: &str) -> Result<String> {
-        let mut graphql_query = String::new();
-
         let media_type = media_type.to_lowercase();
         let media_types = ["anime", "manga", "character", "user", "person", "studio"];
         if !media_types.contains(&media_type.as_str()) {
             panic!("The media type '{}' does not exits", { media_type });
         }
 
-        let file_name = format!("{}_{}.graphql", action, media_type);
-        let file_path = format!("./queries/{}", file_name);
-        File::open(file_path)
-            .and_then(|mut file| file.read_to_string(&mut graphql_query))
-            .unwrap();
+        let graphql_query = match media_type.as_str() {
+            "anime" => include_str!("../queries/get_anime.graphql").to_string(),
+            "manga" => include_str!("../queries/get_manga.graphql").to_string(),
+            "character" => include_str!("../queries/get_character.graphql").to_string(),
+            // "user" => include_str!("../queries/get_user.graphql").to_string(),
+            "person" => include_str!("../queries/get_person.graphql").to_string(),
+            // "studio" => include_str!("../queries/get_studio.graphql").to_string(),
+            _ => unimplemented!(),
+        };
 
         Ok(graphql_query)
     }
