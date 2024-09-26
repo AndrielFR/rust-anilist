@@ -10,6 +10,7 @@ pub type Result<T> = std::result::Result<T, Error>;
 pub enum Error {
     InvalidId,
     InvalidMediaType,
+    ApiError(String),
 }
 
 #[derive(Debug)]

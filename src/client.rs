@@ -34,18 +34,28 @@ impl Client {
 
     pub async fn get_anime(&self, variables: serde_json::Value) -> Result<crate::models::Anime> {
         let data = self.request("anime", "get", variables).await.unwrap();
-        let mut anime = serde_json::from_str::<Anime>(&data["data"]["Media"].to_string()).unwrap();
-        anime.is_full_loaded = true;
 
-        Ok(anime)
+        match serde_json::from_str::<Anime>(&data["data"]["Media"].to_string()) {
+            Ok(mut anime) => {
+                anime.is_full_loaded = true;
+
+                Ok(anime)
+            }
+            Err(e) => Err(crate::Error::ApiError(e.to_string())),
+        }
     }
 
     pub async fn get_manga(&self, variables: serde_json::Value) -> Result<crate::models::Manga> {
         let data = self.request("manga", "get", variables).await.unwrap();
-        let mut manga = serde_json::from_str::<Manga>(&data["data"]["Media"].to_string()).unwrap();
-        manga.is_full_loaded = true;
 
-        Ok(manga)
+        match serde_json::from_str::<Manga>(&data["data"]["Media"].to_string()) {
+            Ok(mut manga) => {
+                manga.is_full_loaded = true;
+
+                Ok(manga)
+            }
+            Err(e) => Err(crate::Error::ApiError(e.to_string())),
+        }
     }
 
     pub async fn get_character(
@@ -53,11 +63,15 @@ impl Client {
         variables: serde_json::Value,
     ) -> Result<crate::models::Character> {
         let data = self.request("character", "get", variables).await.unwrap();
-        let mut character =
-            serde_json::from_str::<Character>(&data["data"]["Character"].to_string()).unwrap();
-        character.is_full_loaded = true;
 
-        Ok(character)
+        match serde_json::from_str::<Character>(&data["data"]["Character"].to_string()) {
+            Ok(mut character) => {
+                character.is_full_loaded = true;
+
+                Ok(character)
+            }
+            Err(e) => Err(crate::Error::ApiError(e.to_string())),
+        }
     }
 
     pub async fn get_char(&self, variables: serde_json::Value) -> Result<crate::models::Character> {
@@ -69,11 +83,15 @@ impl Client {
             .request("person", "get", serde_json::json!({ "id": id }))
             .await
             .unwrap();
-        let mut person =
-            serde_json::from_str::<Person>(&data["data"]["Staff"].to_string()).unwrap();
-        person.is_full_loaded = true;
 
-        Ok(person)
+        match serde_json::from_str::<Person>(&data["data"]["Staff"].to_string()) {
+            Ok(mut person) => {
+                person.is_full_loaded = true;
+
+                Ok(person)
+            }
+            Err(e) => Err(crate::Error::ApiError(e.to_string())),
+        }
     }
 
     pub async fn search_anime(
@@ -110,7 +128,7 @@ impl Client {
         Ok(result)
     }
 
-    pub(crate) fn get_query(media_type: &str, action: &str) -> Result<String> {
+    pub(crate) fn get_query(media_type: &str, _action: &str) -> Result<String> {
         let media_type = media_type.to_lowercase();
         let media_types = ["anime", "manga", "character", "user", "person", "studio"];
         if !media_types.contains(&media_type.as_str()) {
