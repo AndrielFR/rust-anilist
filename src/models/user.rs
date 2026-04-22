@@ -18,7 +18,7 @@ use crate::{Client, Result};
 /// statistics, notification count, and timestamps for creation and
 /// updates.
 #[derive(Debug, Default, Clone, PartialEq, Deserialize, Serialize)]
-#[serde(rename_all(deserialize = "camelCase"))]
+#[serde(default, rename_all(deserialize = "camelCase"))]
 pub struct User {
     /// The ID of the user.
     pub id: i32,

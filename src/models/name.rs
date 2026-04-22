@@ -10,26 +10,26 @@ use serde::{Deserialize, Serialize};
 #[serde(rename_all(deserialize = "camelCase"))]
 pub struct Name {
     /// The first name.
-    pub first: String,
+    pub first: Option<String>,
     /// The middle name, if any.
     pub middle: Option<String>,
     /// The last name, if any.
     pub last: Option<String>,
     /// The full name.
-    full: String,
+    pub full: Option<String>,
     /// The native name, if any.
-    native: Option<String>,
+    pub native: Option<String>,
     /// Alternative names.
-    alternative: Vec<String>,
+    pub alternative: Vec<String>,
     /// Alternative names that may contain spoilers.
-    alternative_spoiler: Option<Vec<String>>,
+    pub alternative_spoiler: Option<Vec<String>>,
     /// The name preferred by the user, if any.
-    user_preferred: Option<String>,
+    pub user_preferred: Option<String>,
 }
 
 impl Name {
     /// Returns the full name.
-    pub fn full(&self) -> String {
+    pub fn full(&self) -> Option<String> {
         self.full.clone()
     }
 
@@ -61,26 +61,26 @@ mod tests {
     #[test]
     fn test_full() {
         let name = Name {
-            first: "John".to_string(),
+            first: Some("John".to_string()),
             middle: Some("Doe".to_string()),
             last: Some("Smith".to_string()),
-            full: "John Doe Smith".to_string(),
+            full: Some("John Doe Smith".to_string()),
             native: Some("ジョン ドウ スミス".to_string()),
             alternative: vec!["Johnny".to_string()],
             alternative_spoiler: Some(vec!["J.D.".to_string()]),
             user_preferred: Some("John Smith".to_string()),
         };
 
-        assert_eq!(name.full(), "John Doe Smith");
+        assert_eq!(name.full(), Some("John Doe Smith".to_string()));
     }
 
     #[test]
     fn test_native() {
         let name = Name {
-            first: "John".to_string(),
+            first: Some("John".to_string()),
             middle: Some("Doe".to_string()),
             last: Some("Smith".to_string()),
-            full: "John Doe Smith".to_string(),
+            full: Some("John Doe Smith".to_string()),
             native: Some("ジョン ドウ スミス".to_string()),
             alternative: vec!["Johnny".to_string()],
             alternative_spoiler: Some(vec!["J.D.".to_string()]),
@@ -93,10 +93,10 @@ mod tests {
     #[test]
     fn test_alternative() {
         let name = Name {
-            first: "John".to_string(),
+            first: Some("John".to_string()),
             middle: Some("Doe".to_string()),
             last: Some("Smith".to_string()),
-            full: "John Doe Smith".to_string(),
+            full: Some("John Doe Smith".to_string()),
             native: Some("ジョン ドウ スミス".to_string()),
             alternative: vec!["Johnny".to_string()],
             alternative_spoiler: Some(vec!["J.D.".to_string()]),
@@ -109,10 +109,10 @@ mod tests {
     #[test]
     fn test_spoiler() {
         let name = Name {
-            first: "John".to_string(),
+            first: Some("John".to_string()),
             middle: Some("Doe".to_string()),
             last: Some("Smith".to_string()),
-            full: "John Doe Smith".to_string(),
+            full: Some("John Doe Smith".to_string()),
             native: Some("ジョン ドウ スミス".to_string()),
             alternative: vec!["Johnny".to_string()],
             alternative_spoiler: Some(vec!["J.D.".to_string()]),
@@ -125,10 +125,10 @@ mod tests {
     #[test]
     fn test_user_preferred() {
         let name = Name {
-            first: "John".to_string(),
+            first: Some("John".to_string()),
             middle: Some("Doe".to_string()),
             last: Some("Smith".to_string()),
-            full: "John Doe Smith".to_string(),
+            full: Some("John Doe Smith".to_string()),
             native: Some("ジョン ドウ スミス".to_string()),
             alternative: vec!["Johnny".to_string()],
             alternative_spoiler: Some(vec!["J.D.".to_string()]),

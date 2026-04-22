@@ -19,7 +19,7 @@ use crate::{Client, Result};
 /// hashtags, images, genres, synonyms, scores, popularity, tags,
 /// relations, characters, staff, studios, and other metadata.
 #[derive(Debug, Default, Clone, PartialEq, Deserialize, Serialize)]
-#[serde(rename_all(deserialize = "camelCase"))]
+#[serde(default, rename_all(deserialize = "camelCase"))]
 pub struct Manga {
     /// The ID of the manga.
     pub id: i64,

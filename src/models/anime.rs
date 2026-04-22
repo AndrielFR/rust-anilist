@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2022-2025 Andriel Ferreira <https://github.com/AndrielFR>
 
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Deserializer, Serialize};
 use serde_json::Value;
 
 use super::{
@@ -18,7 +18,7 @@ use crate::{Client, Result};
 /// hashtags, images, genres, synonyms, scores, popularity, tags,
 /// relations, characters, staff, studios, and other metadata.
 #[derive(Debug, Default, Clone, PartialEq, Deserialize, Serialize)]
-#[serde(rename_all(deserialize = "camelCase"))]
+#[serde(default, rename_all(deserialize = "camelCase"))]
 pub struct Anime {
     /// The ID of the anime.
     pub id: i64,
@@ -83,12 +83,13 @@ pub struct Anime {
     /// The relations of the anime.
     pub(crate) relations: Value,
     /// The characters of the anime.
-    pub(crate) characters: Value,
+    #[serde(rename = "characters", deserialize_with = "deserialize_characters")]
+    pub characters: Option<Vec<Character>>,
     /// The staff of the anime.
-    #[serde(skip)]
+    #[serde(rename = "staff", deserialize_with = "deserialize_staff")]
     pub staff: Option<Vec<Person>>,
     /// The studios of the anime.
-    #[serde(skip)]
+    #[serde(rename = "studios", deserialize_with = "deserialize_studios")]
     pub studios: Option<Vec<Studio>>,
     /// Whether the anime is favourite or not.
     pub is_favourite: Option<bool>,
@@ -143,32 +144,6 @@ impl Anime {
         }
     }
 
-    /// Returns the characters of the anime.
-    pub fn characters(&self) -> Result<Vec<Character>> {
-        let binding = Vec::new();
-        let edges = self
-            .characters
-            .as_object()
-            .and_then(|obj| obj.get("edges"))
-            .and_then(|edges| edges.as_array())
-            .unwrap_or(&binding);
-
-        let mut characters = Vec::with_capacity(edges.len());
-
-        for edge in edges {
-            let binding = serde_json::Map::new();
-            let obj = edge.as_object().unwrap_or(&binding);
-            let node = obj.get("node").unwrap_or(&Value::Null);
-            let role = obj.get("role").and_then(|role| role.as_str()).unwrap_or("");
-
-            let mut character: Character = serde_json::from_value(node.clone()).unwrap_or_default();
-            character.role = Some(role.into());
-            characters.push(character);
-        }
-
-        Ok(characters)
-    }
-
     /// Returns the relations of the anime.
     pub fn relations(&self) -> Result<Vec<Relation>> {
         let binding = Vec::new();
@@ -205,4 +180,70 @@ pub struct AiringSchedule {
     pub time_until: u64,
     /// The airing episode.
     pub episode: u32,
+}
+
+fn deserialize_studios<'de, D>(deserializer: D) -> std::result::Result<Option<Vec<Studio>>, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    #[derive(Deserialize)]
+    struct StudioConnection {
+        nodes: Vec<Studio>,
+    }
+    let connection: Option<StudioConnection> = Option::deserialize(deserializer)?;
+    Ok(connection.map(|c| c.nodes))
+}
+
+fn deserialize_characters<'de, D>(
+    deserializer: D,
+) -> std::result::Result<Option<Vec<Character>>, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    #[derive(Deserialize)]
+    #[serde(rename_all = "camelCase")]
+    struct CharacterEdge {
+        node: Character,
+        role: Option<String>,
+        voice_actors: Option<Vec<Person>>,
+    }
+    #[derive(Deserialize)]
+    struct CharacterConnection {
+        edges: Vec<CharacterEdge>,
+    }
+
+    let connection: Option<CharacterConnection> = Option::deserialize(deserializer)?;
+
+    match connection {
+        Some(conn) => {
+            let characters = conn
+                .edges
+                .into_iter()
+                .map(|edge| {
+                    let mut character = edge.node;
+                    if let Some(role_str) = edge.role {
+                        character.role = Some(role_str.into());
+                    }
+                    if let Some(voice_actors) = edge.voice_actors {
+                        character.voice_actors = Some(voice_actors);
+                    }
+                    character
+                })
+                .collect();
+            Ok(Some(characters))
+        }
+        None => Ok(None),
+    }
+}
+
+fn deserialize_staff<'de, D>(deserializer: D) -> std::result::Result<Option<Vec<Person>>, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    #[derive(Deserialize)]
+    struct StaffConnection {
+        nodes: Vec<Person>,
+    }
+    let connection: Option<StaffConnection> = Option::deserialize(deserializer)?;
+    Ok(connection.map(|c| c.nodes))
 }

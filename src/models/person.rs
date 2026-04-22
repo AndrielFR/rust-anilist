@@ -48,7 +48,7 @@ pub struct Person {
     #[serde(skip)]
     pub characters: Option<Vec<Character>>,
     /// The number of favorites the person has.
-    pub favourites: i64,
+    pub favourites: Option<i64>,
     /// The moderator notes for the person, if any.
     pub mod_notes: Option<String>,
 

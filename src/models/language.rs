@@ -65,6 +65,8 @@ pub enum Language {
     Hindi,
     /// The Urdu language.
     Urdu,
+    /// The Polish language.
+    Polish,
 }
 
 impl Language {
@@ -97,6 +99,7 @@ impl Language {
             Language::Nepali => "ne",
             Language::Hindi => "hi",
             Language::Urdu => "ur",
+            Language::Polish => "pl",
         }
     }
 
@@ -136,6 +139,7 @@ impl Language {
             Language::Nepali => "नेपाली",
             Language::Hindi => "हिंदी",
             Language::Urdu => "اردو",
+            Language::Polish => "Polski",
         }
     }
 }
@@ -169,6 +173,7 @@ impl From<&str> for Language {
             "NE" | "NEPALI" => Language::Nepali,
             "HI" | "HINDI" => Language::Hindi,
             "UR" | "URDU" => Language::Urdu,
+            "PL" | "POLISH" => Language::Polish,
             _ => Language::default(),
         }
     }
@@ -209,6 +214,7 @@ impl std::fmt::Display for Language {
             Language::Nepali => write!(f, "Nepali"),
             Language::Hindi => write!(f, "Hindi"),
             Language::Urdu => write!(f, "Urdu"),
+            Language::Polish => write!(f, "Polish"),
         }
     }
 }
@@ -245,6 +251,7 @@ mod tests {
         assert_eq!(Language::Nepali.code(), "ne");
         assert_eq!(Language::Hindi.code(), "hi");
         assert_eq!(Language::Urdu.code(), "ur");
+        assert_eq!(Language::Polish.code(), "pl");
     }
 
     #[test]
@@ -275,6 +282,7 @@ mod tests {
         assert_eq!(Language::Nepali.iso(), "ne");
         assert_eq!(Language::Hindi.iso(), "hi");
         assert_eq!(Language::Urdu.iso(), "ur");
+        assert_eq!(Language::Polish.iso(), "pl");
     }
 
     #[test]
@@ -305,6 +313,7 @@ mod tests {
         assert_eq!(Language::Nepali.native(), "नेपाली");
         assert_eq!(Language::Hindi.native(), "हिंदी");
         assert_eq!(Language::Urdu.native(), "اردو");
+        assert_eq!(Language::Polish.native(), "Polski");
     }
 
     #[test]
@@ -335,6 +344,7 @@ mod tests {
         assert_eq!(Language::from("ne"), Language::Nepali);
         assert_eq!(Language::from("hi"), Language::Hindi);
         assert_eq!(Language::from("ur"), Language::Urdu);
+        assert_eq!(Language::from("pl"), Language::Polish);
         assert_eq!(Language::from("unknown"), Language::Japanese); // Default case
     }
 
@@ -366,6 +376,7 @@ mod tests {
         assert_eq!(Language::from("ne".to_string()), Language::Nepali);
         assert_eq!(Language::from("hi".to_string()), Language::Hindi);
         assert_eq!(Language::from("ur".to_string()), Language::Urdu);
+        assert_eq!(Language::from("pl".to_string()), Language::Polish);
         assert_eq!(Language::from("unknown".to_string()), Language::Japanese); // Default case
     }
 }

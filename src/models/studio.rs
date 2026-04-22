@@ -22,11 +22,12 @@ pub struct Studio {
     /// Whether the studio is an animation studio.
     pub is_animation_studio: bool,
     /// The URL of the studio.
-    pub url: String,
+    #[serde(rename = "siteUrl")]
+    pub url: Option<String>,
     /// Whether the studio is a favorite.
     pub is_favourite: Option<bool>,
     /// The number of favorites the studio has.
-    pub favourites: i64,
+    pub favourites: Option<i64>,
 }
 
 impl Studio {

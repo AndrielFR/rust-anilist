@@ -21,11 +21,11 @@ pub enum Gender {
     NonBinary,
     /// Represents a custom gender specified by a string.
     #[serde(untagged)]
-    Other(String),
+    Other(Option<String>),
 }
 
 impl Default for Gender {
     fn default() -> Self {
-        Gender::Other(String::from("Neutral"))
+        Gender::Other(Some(String::from("Neutral")))
     }
 }

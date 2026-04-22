@@ -114,6 +114,25 @@ query ($id: Int) {
           siteUrl
         }
         role
+        voiceActors(sort: RELEVANCE) {
+          id
+          name {
+            first
+            middle
+            last
+            full
+            native
+            alternative
+            userPreferred
+          }
+          languageV2
+          image {
+            large
+            medium
+          }
+          gender
+          siteUrl
+        }
       }
     }
     staff(sort: RELEVANCE) {
